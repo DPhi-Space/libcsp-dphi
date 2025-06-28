@@ -1,5 +1,3 @@
-
-
 #include <csp/interfaces/csp_if_kiss.h>
 
 #include <csp/csp_debug.h>
@@ -7,6 +5,7 @@
 
 #include <csp/csp.h>
 #include <csp/drivers/usart.h>
+#include "uart_msp430.h"
 
 typedef struct {
 	char name[CSP_IFLIST_NAME_MAX + 1];
@@ -32,14 +31,18 @@ static void kiss_driver_rx(void * user_data, uint8_t * data, size_t data_size, v
 
 int csp_usart_open_and_add_kiss_interface(const csp_usart_conf_t * conf, const char * ifname, uint16_t addr, csp_iface_t ** return_iface) {
 
+	static kiss_context_t contexts[MAX_UARTS];
+	static uint8_t curr_n = 0;
+
 	if (ifname == NULL) {
 		ifname = CSP_IF_KISS_DEFAULT_NAME;
 	}
 
-	kiss_context_t * ctx = calloc(1, sizeof(*ctx));
+	kiss_context_t * ctx = &contexts[curr_n];
 	if (ctx == NULL) {
 		return CSP_ERR_NOMEM;
 	}
+	++curr_n;
 
 	strncpy(ctx->name, ifname, sizeof(ctx->name) - 1);
 	ctx->iface.name = ctx->name;

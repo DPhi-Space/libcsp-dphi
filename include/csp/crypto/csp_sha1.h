@@ -9,6 +9,8 @@
 
 #include <csp/csp_types.h>
 
+#define MIN(a,b)  ( ( (a) < (b) ) ? (a) : (b) )
+
 #ifdef __cplusplus
 extern "C" {
 #endif

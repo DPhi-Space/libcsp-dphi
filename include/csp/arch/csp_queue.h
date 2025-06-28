@@ -14,6 +14,10 @@
 #include <queue.h>
 #endif
 
+#if (CSP_FREERTOS_DPHI)
+#include "csp/arch/mpmc_queue.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -21,7 +25,7 @@ extern "C" {
 #define CSP_QUEUE_OK 0
 #define CSP_QUEUE_ERROR -1
 
-#if (CSP_FREERTOS)
+#if (CSP_FREERTOS | CSP_FREERTOS_DPHI)
 typedef QueueHandle_t csp_queue_handle_t;
 typedef StaticQueue_t csp_static_queue_t;
 #elif (CSP_ZEPHYR)
