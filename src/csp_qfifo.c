@@ -3,6 +3,7 @@
 #include <csp/arch/csp_queue.h>
 #include <csp/csp_debug.h>
 #include <csp/csp_buffer.h>
+#include "csp/csp_types.h"
 #include "csp_macro.h"
 #include "csp/autoconfig.h"
 
@@ -20,6 +21,11 @@ int csp_qfifo_read(csp_qfifo_t * input) {
 		return CSP_ERR_TIMEDOUT;
 
 	return CSP_ERR_NONE;
+}
+
+__weak void csp_qfifo_write_callback(csp_iface_t *iface)
+{
+
 }
 
 void csp_qfifo_write(csp_packet_t * packet, csp_iface_t * iface, void * pxTaskWoken) {
@@ -57,6 +63,8 @@ void csp_qfifo_write(csp_packet_t * packet, csp_iface_t * iface, void * pxTaskWo
 		else
 			csp_buffer_free_isr(packet);
 	}
+
+	csp_qfifo_write_callback(iface);
 }
 
 void csp_qfifo_wake_up(void) {
