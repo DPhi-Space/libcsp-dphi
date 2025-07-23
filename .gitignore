@@ -24,3 +24,5 @@ GRTAGS
 GTAGS
 .vscode/
 build-docs
+build-aarch64
+install-aarch64

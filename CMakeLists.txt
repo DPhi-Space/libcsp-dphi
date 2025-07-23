@@ -75,13 +75,6 @@ if(CSP_POSIX AND CMAKE_HOST_SYSTEM_NAME STREQUAL "Linux")
       message(NOTICE "No libyaml found")
     endif()
 
-    pkg_search_module(LIBZMQ libzmq)
-    if(${LIBZMQ_FOUND})
-      message(STATUS "Found ${LIBZMQ_LINK_LIBRARIES} ${LIBZMQ_VERSION}")
-      set(CSP_HAVE_LIBZMQ 1)
-    else()
-      message(NOTICE "No libzmq found")
-    endif()
 
     pkg_search_module(LIBSOCKETCAN libsocketcan)
     if(${LIBSOCKETCAN_FOUND})
