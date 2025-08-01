@@ -28,3 +28,4 @@ build-aarch64
 install-aarch64
 build-3.13
 install
+install-native
