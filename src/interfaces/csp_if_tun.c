@@ -4,11 +4,13 @@
 #include <csp/csp_hooks.h>
 #include "csp_macro.h"
 
-__weak int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t * msg_out) {
+int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t * msg_out) {
+	csp_print("CRYPTO DECRYPT\r\n");
 	return -1;
 }
 
-__weak int csp_crypto_encrypt(uint8_t * msg_begin, uint8_t msg_len, uint8_t * ciphertext_out) {
+int csp_crypto_encrypt(uint8_t * msg_begin, uint8_t msg_len, uint8_t * ciphertext_out) {
+	csp_print("CRYPTO ENCRYPT\r\n");
 	return -1;
 }
 

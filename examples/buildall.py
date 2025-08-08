@@ -38,6 +38,7 @@ def build_with_waf():
     options = [
         '--with-os=posix',
         '--enable-rdp',
+        '--enable-rtable',
         '--enable-promisc',
         '--enable-crc32',
         '--enable-hmac',

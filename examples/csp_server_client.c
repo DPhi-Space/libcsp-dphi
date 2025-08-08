@@ -4,9 +4,11 @@
 #include <stdlib.h>
 
 #include <csp/csp.h>
+#include <csp/csp_rtable.h>
 #include <csp/drivers/usart.h>
 #include <csp/drivers/can_socketcan.h>
 #include <csp/interfaces/csp_if_zmqhub.h>
+#include <csp/interfaces/csp_if_tun.h>
 
 #include "csp_posix_helper.h"
 
@@ -20,6 +22,7 @@ static uint8_t server_address = 255;
 static bool test_mode = false;
 static unsigned int server_received = 0;
 static unsigned int run_duration_in_sec = 3;
+
 
 /* Server task - handles requests from clients */
 void * server(void * param) {
@@ -142,7 +145,8 @@ static void print_usage(void)
 /* main - initialization of CSP and start of server/client tasks */
 int main(int argc, char * argv[]) {
 
-    uint8_t address = 0;
+    uint8_t address = 1;
+    server_address = 2;                 // peer node’s CSP address (the other process/machine)
     int opt;
     while ((opt = getopt(argc, argv, "v:tT:h")) != -1) {
         switch (opt) {
@@ -181,18 +185,34 @@ int main(int argc, char * argv[]) {
     /* Start router */
     router_start();
 
-    /* Add interface(s) */
-    csp_iface_t * default_iface = NULL;
-    if (!default_iface) {
-        /* no interfaces configured - run server and client in process, using loopback interface */
-        server_address = address;
-    }
+   	csp_if_tun_conf_t tun_conf = {
+		.tun_src = address,
+		.tun_dst = server_address,
+	};
+    csp_iface_t tun_iface_client_server;
+    csp_if_tun_init(&tun_iface_client_server, &tun_conf);
+
+	// 0..254 go via TUN next-hop=0 (link-local on this iface)
+	csp_rtable_set(address, 0, &tun_iface_client_server, CSP_NO_VIA_ADDRESS);
+
+	// csp_if_tun_conf_t tun_conf_server = {
+	// 	.tun_src = server_address,
+	// 	.tun_dst = address,
+	// };
+    // csp_iface_t tun_iface_server_client;
+    // csp_if_tun_init(&tun_iface_server_client, &tun_conf_server);
+
+	// // 0..254 go via TUN next-hop=0 (link-local on this iface)
+	// csp_rtable_set(address, 0, &tun_iface_server_client, CSP_NO_VIA_ADDRESS);
 
     csp_print("Connection table\r\n");
     csp_conn_print_table();
 
     csp_print("Interfaces\r\n");
     csp_iflist_print();
+
+	csp_print("Routing table\r\n");
+    csp_rtable_print();
 
     /* Start server thread */
     csp_pthread_create(server);
