@@ -3,15 +3,56 @@
 #include <csp/csp_id.h>
 #include <csp/csp_hooks.h>
 #include "csp_macro.h"
+#include <ascon/crypto_aead.h>
 
 int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t * msg_out) {
 	csp_print("CRYPTO DECRYPT\r\n");
-	return -1;
+	csp_print("Before decryption : ");
+	unsigned char n[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+  	unsigned char k[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+  	unsigned char a[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+	unsigned char m[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+							11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+							22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+	unsigned char c[32];
+	unsigned long long alen = 16;
+	unsigned long long mlen = 16;
+	unsigned long long clen = 32;
+	int result = 0;
+
+  	result |= crypto_aead_decrypt(m, &mlen, (void*)0, c, clen, a, alen, n, k);
+
+  	return result;
 }
 
 int csp_crypto_encrypt(uint8_t * msg_begin, uint8_t msg_len, uint8_t * ciphertext_out) {
 	csp_print("CRYPTO ENCRYPT\r\n");
-	return -1;
+	unsigned char n[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+  	unsigned char k[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+  	unsigned char a[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+	unsigned char m[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+							11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
+							22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+	unsigned char c[32];
+	unsigned long long alen = 16;
+	unsigned long long mlen = 16;
+	unsigned long long clen = 32;
+	int result = 0;
+
+	result |= crypto_aead_encrypt(c, &clen, m, mlen, a, alen, (void*)0, n, k);
+	return result;
 }
 
 static int csp_if_tun_tx(csp_iface_t * iface, uint16_t via, csp_packet_t * packet, int from_me) {

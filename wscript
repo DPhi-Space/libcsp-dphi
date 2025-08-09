@@ -200,6 +200,7 @@ def configure(ctx):
         [
             "src/crypto/csp_hmac.c",
             "src/crypto/csp_sha1.c",
+            "src/crypto/aead.c",
             "src/csp_buffer.c",
             "src/csp_bridge.c",
             "src/csp_conn.c",
