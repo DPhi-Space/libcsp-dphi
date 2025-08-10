@@ -145,8 +145,8 @@ static void print_usage(void)
 /* main - initialization of CSP and start of server/client tasks */
 int main(int argc, char * argv[]) {
 
-    uint8_t address = 1;
-    server_address = 2;                 // peer node’s CSP address (the other process/machine)
+    uint8_t address = 0;
+    server_address = 0;                 // peer node’s CSP address (the other process/machine)
     int opt;
     while ((opt = getopt(argc, argv, "v:tT:h")) != -1) {
         switch (opt) {
@@ -185,25 +185,15 @@ int main(int argc, char * argv[]) {
     /* Start router */
     router_start();
 
-   	csp_if_tun_conf_t tun_conf = {
-		.tun_src = address,
-		.tun_dst = server_address,
+	csp_if_tun_conf_t tun_conf_server = {
+		.tun_src = server_address,
+		.tun_dst = address,
 	};
-    csp_iface_t tun_iface_client_server;
-    csp_if_tun_init(&tun_iface_client_server, &tun_conf);
+    csp_iface_t tun_iface_server_client;
+    csp_if_tun_init(&tun_iface_server_client, &tun_conf_server);
 
 	// 0..254 go via TUN next-hop=0 (link-local on this iface)
-	csp_rtable_set(address, 0, &tun_iface_client_server, CSP_NO_VIA_ADDRESS);
-
-	// csp_if_tun_conf_t tun_conf_server = {
-	// 	.tun_src = server_address,
-	// 	.tun_dst = address,
-	// };
-    // csp_iface_t tun_iface_server_client;
-    // csp_if_tun_init(&tun_iface_server_client, &tun_conf_server);
-
-	// // 0..254 go via TUN next-hop=0 (link-local on this iface)
-	// csp_rtable_set(address, 0, &tun_iface_server_client, CSP_NO_VIA_ADDRESS);
+	csp_rtable_set(address, 0, &tun_iface_server_client, CSP_NO_VIA_ADDRESS);
 
     csp_print("Connection table\r\n");
     csp_conn_print_table();
