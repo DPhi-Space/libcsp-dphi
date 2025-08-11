@@ -4,46 +4,68 @@
 #include <csp/csp_hooks.h>
 #include "csp_macro.h"
 #include <ascon/crypto_aead.h>
+#include <sys/random.h>
+
+#define ASCON_NONCE_BYTES 16
 
 int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t * msg_out) {
 	csp_print("CRYPTO DECRYPT\r\n");
-	// TODO: Make this random
-	unsigned char n[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
-                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
-	
+	unsigned char n[ASCON_NONCE_BYTES];
+	memset(n, 0, ASCON_NONCE_BYTES);
+
+	// Copy Nonce from incoming message
+	memcpy(n, ciphertext_in, ASCON_NONCE_BYTES);
+	// Adapt lengths and move pointer
+	ciphertext_in += ASCON_NONCE_BYTES;
+	ciphertext_len -= ASCON_NONCE_BYTES;
+
 	// TODO: Get key from elsewhere ?
-  	unsigned char k[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
-                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+  	unsigned char k[16] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                         11, 12, 13, 14, 15};
 	unsigned long long alen = 0;
 	unsigned long long mlen = 0;
 	int result = 0;
 
-	// TODO: Check if we need more size in new packet ??
   	result |= crypto_aead_decrypt(msg_out, &mlen, (void*)0, ciphertext_in, ciphertext_len, NULL, alen, n, k);
-	// TODO: Check result
+	if(!result) {
+		csp_print("Error in decryption...");
+		return -1;
+	}
   	return mlen;
 }
 
 int csp_crypto_encrypt(uint8_t * msg_begin, uint8_t msg_len, uint8_t * ciphertext_out) {
 	csp_print("CRYPTO ENCRYPT\r\n");
-	// TODO: Make this random
-	unsigned char n[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
-                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
-	
+
+	unsigned char n[ASCON_NONCE_BYTES];
+	memset(n, 0, ASCON_NONCE_BYTES);
+
+	// TODO: For now getrandom is ok but need to investigate to have hardware randomness
+	ssize_t random_result = getrandom(n, ASCON_NONCE_BYTES, 0);
+    if (random_result != (ssize_t)ASCON_NONCE_BYTES) {
+        return -1; // Failed to read NONCE_SIZE
+	}
+
+	// Copy Nonce at the beginning of the message
+	memcpy(ciphertext_out, n, ASCON_NONCE_BYTES);
+	ciphertext_out += ASCON_NONCE_BYTES;
+
 	// TODO: Get key from elsewhere ?
-  	unsigned char k[32] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
-                         11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21,
-                         22, 23, 24, 25, 26, 27, 28, 29, 30, 31};
+  	unsigned char k[16] = {0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10,
+                         11, 12, 13, 14, 15};
 	unsigned long long alen = 0;
 	unsigned long long clen = 0;
 	int result = 0;
 
 	// TODO: Check if we need more size in new packet ??
 	result |= crypto_aead_encrypt(ciphertext_out, &clen, msg_begin, msg_len, NULL, alen, (void*)0, n, k);
-	// TODO: Check result
+	if(!result) {
+		csp_print("Error in encryption...");
+		return -1;
+	}
+
+	// Add the prepended Nonce length
+	clen += ASCON_NONCE_BYTES;
 	return clen;
 }
 
