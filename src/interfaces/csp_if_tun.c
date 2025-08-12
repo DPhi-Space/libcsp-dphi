@@ -27,10 +27,11 @@ int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t 
 	int result = 0;
 
   	result |= crypto_aead_decrypt(msg_out, &mlen, (void*)0, ciphertext_in, ciphertext_len, NULL, alen, n, k);
-	if(!result) {
-		csp_print("Error in decryption...");
+	if(result) {
+		csp_print("Error in decryption... Error : %i\n", result);
 		return -1;
 	}
+	csp_print("The returned decrypted length is %u compared to initial length : %u\n", mlen, ciphertext_len);
   	return mlen;
 }
 
@@ -57,15 +58,17 @@ int csp_crypto_encrypt(uint8_t * msg_begin, uint8_t msg_len, uint8_t * ciphertex
 	unsigned long long clen = 0;
 	int result = 0;
 
-	// TODO: Check if we need more size in new packet ??
+	// TODO Check on packet limit size ?
 	result |= crypto_aead_encrypt(ciphertext_out, &clen, msg_begin, msg_len, NULL, alen, (void*)0, n, k);
-	if(!result) {
-		csp_print("Error in encryption...");
+	if(result)
+	{
+		csp_print("Error in decryption... Error : %i\n", result);
 		return -1;
 	}
 
 	// Add the prepended Nonce length
 	clen += ASCON_NONCE_BYTES;
+	csp_print("The returned encrypted length is %u compared to initial length : %u\n", clen, msg_len);
 	return clen;
 }
 
