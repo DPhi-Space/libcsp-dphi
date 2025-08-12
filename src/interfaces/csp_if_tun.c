@@ -10,6 +10,7 @@
 
 int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t * msg_out) {
 	csp_print("CRYPTO DECRYPT\r\n");
+	csp_print_packet()
 	unsigned char n[ASCON_NONCE_BYTES];
 	memset(n, 0, ASCON_NONCE_BYTES);
 
@@ -88,7 +89,7 @@ static int csp_if_tun_tx(csp_iface_t * iface, uint16_t via, csp_packet_t * packe
 		/**
 		 * Incomming tunnel packet
 		 */
-		//csp_hex_dump("incoming packet", packet->data, packet->length);
+		csp_hex_dump("incoming packet", packet->data, packet->length);
 
 		csp_id_setup_rx(new_packet);
 
@@ -115,7 +116,7 @@ static int csp_if_tun_tx(csp_iface_t * iface, uint16_t via, csp_packet_t * packe
 
 		csp_id_strip(new_packet);
 
-		//csp_hex_dump("new packet", new_packet->data, new_packet->length);
+		csp_hex_dump("new packet", new_packet->data, new_packet->length);
 
 		/* Send new packet */
 		csp_qfifo_write(new_packet, iface, NULL);
@@ -131,7 +132,7 @@ static int csp_if_tun_tx(csp_iface_t * iface, uint16_t via, csp_packet_t * packe
 		/* Apply CSP header */
 		csp_id_prepend(packet);
 
-		//csp_hex_dump("frame", packet->frame_begin, packet->frame_length);
+		csp_hex_dump("outgoing frame", packet->frame_begin, packet->frame_length);
 
 		/* Create tunnel header */
 		new_packet->id.dst = ifconf->tun_dst;
@@ -152,12 +153,12 @@ static int csp_if_tun_tx(csp_iface_t * iface, uint16_t via, csp_packet_t * packe
 		/* Free old packet */
 		csp_buffer_free(packet);
 
-		//csp_hex_dump("new packet", new_packet->data, new_packet->length);
+		//csp_hex_dump("outgoing new packet", new_packet->data, new_packet->length);
 
 		/* Apply CSP header */
 		csp_id_prepend(new_packet);
 
-		//csp_hex_dump("new frame", new_packet->frame_begin, new_packet->frame_length);
+		csp_hex_dump("outgoing new frame", new_packet->frame_begin, new_packet->frame_length);
 
 		/* Send new packet */
 		csp_qfifo_write(new_packet, iface, NULL);
