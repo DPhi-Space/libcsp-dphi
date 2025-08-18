@@ -189,7 +189,7 @@ def configure(ctx):
 
     # Platform/OS specifics
     if ctx.options.with_os == "posix":
-        ctx.env.append_unique("LIBS", ["rt", "pthread", "util"])
+        ctx.env.append_unique("LIBS", ["rt", "pthread", "util", "sodium"])
 
     ctx.define_cond("CSP_FREERTOS", ctx.options.with_os == "freertos")
     ctx.define_cond("CSP_POSIX", ctx.options.with_os == "posix")
