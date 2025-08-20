@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #define ASCON_NONCE_BYTES 16
+#define CSP_ENCRYPTION_KEY_PATH "/etc/csp-key"
 
 // Secure memory clearing function
 void secure_zero(void *ptr, size_t len) {
@@ -90,7 +91,7 @@ int load_ascon_key(const char *filename, uint8_t *key) {
 
 // TODO : Have defines to have ASCON / AES  choice at compilation time
 int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t * msg_out) {
-	// Prepare buffer for 16bytes Nonce
+	// Prepare buffer for 16 bytes Nonce
 	unsigned char n[ASCON_NONCE_BYTES];
 	memset(n, 0, ASCON_NONCE_BYTES);
 
@@ -99,18 +100,22 @@ int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t 
 		memcpy(ciphertext_in, msg_out, ciphertext_len);
 		return ciphertext_len;
 	}
+
+	if (sodium_init() == -1) {
+		// TODO: Maybe handle differently
+		memcpy(ciphertext_in, msg_out, ciphertext_len);
+		csp_print("Failed to init libsodium\n");
+		return ciphertext_len;
+	}
+
 	// Copy Nonce from incoming message
 	memcpy(n, ciphertext_in, ASCON_NONCE_BYTES);
 	// Adapt lengths and move pointer
 	ciphertext_in += ASCON_NONCE_BYTES;
-	ciphertext_len -= ASCON_NONCE_BYTES;
-
-	if (sodium_init() == -1) {
-        return -1;
-	}	
+	ciphertext_len -= ASCON_NONCE_BYTES;		
 
   	unsigned char k[16];
-	load_ascon_key("/etc/csp-key", k);
+	load_ascon_key(CSP_ENCRYPTION_KEY_PATH, k);
 
 	unsigned long long alen = 0;
 	unsigned long long mlen = 0;
@@ -118,6 +123,8 @@ int csp_crypto_decrypt(uint8_t * ciphertext_in, uint8_t ciphertext_len, uint8_t 
 
 	// Ascon decryption and get result
   	result |= crypto_aead_decrypt(msg_out, &mlen, (void*)0, ciphertext_in, ciphertext_len, NULL, alen, n, k);
+	secure_zero(k, sizeof(k));
+	
 	if(result) {
 		csp_print("Error in decryption... Error : %i\n", result);
 		// As there was an error but no means to tell CSP, we can copy original message directly
@@ -137,25 +144,21 @@ int csp_crypto_encrypt(uint8_t * msg_begin, uint8_t msg_len, uint8_t * ciphertex
 	unsigned char n[ASCON_NONCE_BYTES];
 	memset(n, 0, ASCON_NONCE_BYTES);
 
-	// TODO: For now getrandom is ok but need to investigate to have hardware randomness
-	ssize_t random_result = getrandom(n, ASCON_NONCE_BYTES, 0);
-    if (random_result != (ssize_t)ASCON_NONCE_BYTES) {
-        // Failed to read NONCE_SIZE
+	if (sodium_init() == -1) {
+		// Failed to read NONCE_SIZE in random
 		memcpy(msg_begin, ciphertext_out, msg_len);
-		csp_print("Failed to read NONCE_SIZE from urandom\n");
+		csp_print("Failed to init libsodium\n");
 		return msg_len;
 	}
+
+	randombytes_buf(n, ASCON_NONCE_BYTES);
 
 	// Copy Nonce at the beginning of the message
 	memcpy(ciphertext_out, n, ASCON_NONCE_BYTES);
 	ciphertext_out += ASCON_NONCE_BYTES;
 
-	if (sodium_init() == -1) {
-        return -1;
-	}
-
 	unsigned char k[16];
-	load_ascon_key("/etc/csp-key", k);
+	load_ascon_key(CSP_ENCRYPTION_KEY_PATH, k);
 	
 	unsigned long long alen = 0;
 	unsigned long long clen = 0;
@@ -163,6 +166,8 @@ int csp_crypto_encrypt(uint8_t * msg_begin, uint8_t msg_len, uint8_t * ciphertex
 
 	// TODO: Check on packet limit size ?
 	result |= crypto_aead_encrypt(ciphertext_out, &clen, msg_begin, msg_len, NULL, alen, (void*)0, n, k);
+	secure_zero(k, sizeof(k));
+
 	if(result) {
 		// No ways to tell CSP there was an error, we then return the unencrypted frame
 		ciphertext_out -= ASCON_NONCE_BYTES;
