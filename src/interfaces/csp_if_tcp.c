@@ -221,7 +221,7 @@ void* csp_if_tcp_rx_loop(void* param) {
     return NULL;
 }
 
-void csp_if_tcp_init(csp_iface_t* iface, csp_if_tcp_conf_t* ifconf) {
+int csp_if_tcp_init(csp_iface_t* iface, csp_if_tcp_conf_t* ifconf) {
     pthread_attr_t attributes;
     int ret;
 
@@ -247,25 +247,31 @@ void csp_if_tcp_init(csp_iface_t* iface, csp_if_tcp_conf_t* ifconf) {
     ret = pthread_attr_init(&attributes);
     if (ret != 0) {
         csp_print("csp_if_tcp_init: pthread_attr_init failed: %s: %d\n", strerror(ret), ret);
+        return CSP_ERR_INVAL;
     }
 
     ret = pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
     if (ret != 0) {
         csp_print("csp_if_tcp_init: pthread_attr_setdetachstate failed: %s: %d\n", strerror(ret), ret);
+        return CSP_ERR_INVAL;
     }
 
     ret = pthread_create(&ifconf->server_handle, &attributes, csp_if_tcp_rx_loop, iface);
     if (ret != 0) {
         csp_print("csp_if_tcp_init: pthread_create failed: %s: %d\n", strerror(ret), ret);
+        return CSP_ERR_INVAL;
     }
 
     ret = pthread_attr_destroy(&attributes);
     if (ret != 0) {
         csp_print("csp_if_tcp_init: pthread_attr_destroy failed: %s: %d\n", strerror(ret), ret);
+        return CSP_ERR_INVAL;
     }
 
     /* Register interface */
     iface->name = "TCP";
     iface->nexthop = csp_if_tcp_tx;
     csp_iflist_add(iface);
+
+    return CSP_ERR_NONE;
 }

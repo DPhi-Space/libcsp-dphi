@@ -29,7 +29,7 @@ typedef struct {
  * @param iface Pointer to the interface structure
  * @param ifconf Pointer to the TCP configuration
  */
-void csp_if_tcp_init(csp_iface_t * iface, csp_if_tcp_conf_t * ifconf);
+int csp_if_tcp_init(csp_iface_t * iface, csp_if_tcp_conf_t * ifconf);
 
 /**
  * TCP receive work function, used internally
