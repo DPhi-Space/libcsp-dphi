@@ -101,7 +101,7 @@ static int csp_route_security_check(uint32_t security_opts, csp_iface_t * iface,
 
 
 __weak void csp_input_hook(csp_iface_t * iface, csp_packet_t * packet) {
-	csp_print_packet("INP: S %u, D %u, Dp %u, Sp %u, Pr %u, Fl 0x%02X, Sz %" PRIu16 " VIA: %s, Tms %u\n",
+	csp_print_packet("INP: S 0x%02x, D 0x%02x, Dp %u, Sp %u, Pr %u, Fl 0x%02X, Sz %" PRIu16 " VIA: %s, Tms %u\n",
 				   packet->id.src, packet->id.dst, packet->id.dport,
 				   packet->id.sport, packet->id.pri, packet->id.flags, packet->length, iface->name, csp_get_ms());
 }
@@ -171,7 +171,7 @@ int csp_route_work(void) {
 	}
 
 	/**
-	 * Callbacks 
+	 * Callbacks
 	 */
 	csp_callback_t callback = csp_port_get_callback(packet->id.dport);
 	if (callback) {
@@ -186,7 +186,7 @@ int csp_route_work(void) {
 	}
 
 	/**
-	 * Sockets 
+	 * Sockets
 	 */
 
 	/* The message is to me, search for incoming socket */
@@ -205,7 +205,7 @@ int csp_route_work(void) {
 			csp_buffer_free(packet);
 			return CSP_ERR_NONE;
 		}
-		
+
 		return CSP_ERR_NONE;
 	}
 
