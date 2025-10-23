@@ -219,6 +219,7 @@ def configure(ctx):
             "src/csp_sfp.c",
             "src/interfaces/csp_if_lo.c",
             "src/interfaces/csp_if_tcp.c",
+            "src/interfaces/csp_if_pts.c",
             "src/interfaces/csp_if_eth.c",
             "src/drivers/eth/eth_linux.c",
             "src/interfaces/csp_if_can.c",
