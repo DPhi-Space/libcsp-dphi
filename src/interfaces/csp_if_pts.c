@@ -109,6 +109,12 @@ static int csp_if_pts_tx(csp_iface_t * iface, uint16_t via, csp_packet_t * packe
 	}
 	const unsigned char stop[] = {FEND};
 	// ifdata->tx_func(driver, stop, sizeof(stop));
+	sent = send(ifconf->sockfd, stop, sizeof(stop), MSG_NOSIGNAL);
+	if (sent != 1) {
+		csp_print("PTS: failed to send data (%zd/%zu): %s\n",
+				  sent, sizeof(stop), strerror(errno));
+		return CSP_ERR_DRIVER;
+	}
 
 	csp_buffer_free(packet);
 	return CSP_ERR_NONE;
