@@ -231,9 +231,9 @@ int csp_if_pts_init(csp_iface_t ** return_iface, csp_if_pts_conf_t * ifconf, con
 
 	ifconf->sockfd = 0;
 
-	if (ifconf->host[sizeof(ifconf->host) - 1] != '\0') {
-		ifconf->host[sizeof(ifconf->host) - 1] = '\0';
-	}
+	//	if (ifconf->host[sizeof(ifconf->host) - 1] != '\0') {
+	//	ifconf->host[sizeof(ifconf->host) - 1] = '\0';
+	//}
 
 	if (inet_aton(ifconf->host, &ifconf->peer_addr.sin_addr) == 0) {
 		csp_print("PTS: Unknown peer address %s\n", ifconf->host);

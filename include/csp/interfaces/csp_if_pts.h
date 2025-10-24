@@ -12,7 +12,7 @@ extern "C" {
 #endif
 
 typedef struct {
-	char host[16];
+	const char * host;
 	uint16_t rport;
 	int sockfd;
 	struct sockaddr_in peer_addr;
