@@ -49,6 +49,8 @@ int csp_if_tcp_rx_work(int sockfd, size_t unused, csp_iface_t * iface);
  */
 void * csp_if_tcp_rx_loop(void * param);
 
+bool csp_if_tcp_connected();
+
 #ifdef __cplusplus
 }
 #endif
