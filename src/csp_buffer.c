@@ -18,18 +18,22 @@ typedef struct csp_skbf_s {
 // Queue of free CSP buffers
 static csp_queue_handle_t csp_buffers;
 
+//__attribute__((section(".TI.persistent")))
+#pragma NOINIT(csp_buffer_pool)
+static csp_skbf_t csp_buffer_pool[CSP_BUFFER_COUNT];
+//__attribute__((section(".TI.persistent")))
+#pragma NOINIT(csp_buffers_queue)
+static csp_static_queue_t csp_buffers_queue;
+//__attribute__((section(".TI.persistent")))
+#pragma NOINIT(csp_buffer_queue_data)
+static char csp_buffer_queue_data[CSP_BUFFER_COUNT * sizeof(csp_skbf_t *)];
+
 void csp_buffer_init(void) {
 	/**
 	 * Chunk of memory allocated for CSP buffers:
 	 * This is marked as .noinit, because csp buffers can never be assumed zeroed out
 	 * Putting this section in a separate non .bss area, saves some boot time */
 
-	__attribute__((section(".TI.persistent")))
-	static csp_skbf_t csp_buffer_pool[CSP_BUFFER_COUNT];
-	__attribute__((section(".TI.persistent")))
-	static csp_static_queue_t csp_buffers_queue;
-	__attribute__((section(".TI.persistent")))
-	static char csp_buffer_queue_data[CSP_BUFFER_COUNT * sizeof(csp_skbf_t *)];
 
 	csp_buffers = csp_queue_create_static(CSP_BUFFER_COUNT, sizeof(csp_skbf_t *), csp_buffer_queue_data, &csp_buffers_queue);
 
