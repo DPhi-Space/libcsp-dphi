@@ -223,6 +223,7 @@ void * csp_if_tcp_rx_loop(void * param) {
 				if (ifconf->sockfd >= 0) {
 					csp_print("TCP: Client reconnected from %s:%d\n", inet_ntoa(client_addr.sin_addr),
 							  ntohs(client_addr.sin_port));
+					connected = true;
 				}
 			}
 		}
