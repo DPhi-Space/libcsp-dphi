@@ -189,7 +189,7 @@ def configure(ctx):
 
     # Platform/OS specifics
     if ctx.options.with_os == "posix":
-        ctx.env.append_unique("LIBS", ["rt", "pthread", "util"])
+        ctx.env.append_unique("LIBS", ["rt", "pthread", "util", "sodium"])
 
     ctx.define_cond("CSP_FREERTOS", ctx.options.with_os == "freertos")
     ctx.define_cond("CSP_POSIX", ctx.options.with_os == "posix")
@@ -200,6 +200,7 @@ def configure(ctx):
         [
             "src/crypto/csp_hmac.c",
             "src/crypto/csp_sha1.c",
+            "src/crypto/aead.c",
             "src/csp_buffer.c",
             "src/csp_bridge.c",
             "src/csp_conn.c",
@@ -219,6 +220,7 @@ def configure(ctx):
             "src/csp_sfp.c",
             "src/interfaces/csp_if_lo.c",
             "src/interfaces/csp_if_tcp.c",
+            "src/interfaces/csp_if_pts.c",
             "src/interfaces/csp_if_eth.c",
             "src/drivers/eth/eth_linux.c",
             "src/interfaces/csp_if_can.c",

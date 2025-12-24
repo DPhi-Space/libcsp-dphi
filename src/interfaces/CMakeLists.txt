@@ -1,6 +1,8 @@
 target_sources(csp PRIVATE
   csp_if_lo.c
   csp_if_tcp.c
+  csp_if_pts.c
+  csp_if_csp.c
   csp_if_kiss.c
   csp_if_i2c.c
   csp_if_tun.c
